@@ -88,6 +88,9 @@ def init():
     p.weight_display.draw(p.win)
     p.delta_display.draw(p.win)
     
+    zero = Line(Point(0, 250), Point(500, 250))
+    zero.draw(p.graphwin)
+    
     p.win.getMouse()
 
 def update_graphs():
@@ -102,7 +105,7 @@ def update_graphs():
             po.move(-1, 0)
     for l in p.datalines:
         l.move(-1, 0)
-    p.last_points[0].append(Point(500, 500-p.robot.getPos()))
+    p.last_points[0].append(Point(500, 250-(p.robot.getPos()-p.target)))
     p.last_points[1].append(Point(500, 250-p.cont.last_output))
     p.last_points[2].append(Point(500, 250-getattr(p, 'last_random', 0)))
     for i, t in enumerate(p.last_points):
