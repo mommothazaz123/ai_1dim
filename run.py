@@ -21,7 +21,9 @@ class Program:
         a = round(max_move_dist/(20*3))
         a = min(50, a)
         #a = 0
-        self.robot.move(random.randint(-a, a))
+        r = random.randint(-a, a)
+        self.last_random = r
+        self.robot.move(r)
 
 p = Program()
 
@@ -72,6 +74,7 @@ class Controller:
 
 def init():
     p.win = GraphWin("1D Point", X_MAX, 2*Y_VALUE, autoflush=False) #500x500 window
+    p.graphwin = GraphWin("Data", 500, 500, autoflush=False)
     p.target = random.randint(X_MIN, X_MAX)
     
     p.robot = Robot(random.randint(X_MIN, X_MAX))
@@ -87,6 +90,28 @@ def init():
     
     p.win.getMouse()
 
+def update_graphs():
+    X_VALUE_COLOR = 'green'
+    OUTPUT_COLOR = 'red'
+    RANDOM_COLOR = 'blue'
+    colors = (X_VALUE_COLOR, OUTPUT_COLOR, RANDOM_COLOR)
+    p.last_points = getattr(p, 'last_points', None) or [[], [], []] # [[x], [o], [r]]
+    p.datalines = getattr(p, 'datalines', None) or []
+    for t in p.last_points:
+        for po in t:
+            po.move(-1, 0)
+    for l in p.datalines:
+        l.move(-1, 0)
+    p.last_points[0].append(Point(500, 500-p.robot.getPos()))
+    p.last_points[1].append(Point(500, 250-p.cont.last_output))
+    p.last_points[2].append(Point(500, 250-getattr(p, 'last_random', 0)))
+    for i, t in enumerate(p.last_points):
+        if len(t) > 1:
+            li = Line(t[-2], t[-1])
+            li.setFill(colors[i])
+            li.draw(p.graphwin)
+            p.datalines.append(li)
+
 def loop(iteration):
     before = p.cont.get_delta()
     p.cont.move_robot()
@@ -97,6 +122,8 @@ def loop(iteration):
     
     p.weight_display.setText("Weight: " + str(p.cont.weight))
     p.delta_display.setText("Delta: " + str(p.cont.get_delta()))
+    
+    update_graphs()
     
     time.sleep(PROGRAM_SPEED)
     a = p.win.checkMouse()
