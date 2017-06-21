@@ -65,8 +65,17 @@ class Controller:
         self.output(self.weight * self.get_delta())
         
     def learn(self, before, after):
-        self.weight += -self.learn_rate * (self.last_output * (after - before) * PROGRAM_SPEED)
-        self.weight = max(-0.5, min(0.5, self.weight))
+        
+        delta = abs(after) - abs(before)
+        o = self.last_output
+        if p.target > self.robot.getPos(): o = -o
+        if not abs(delta) == abs(self.last_output): o = -abs(o)
+        a = -self.learn_rate * (o * delta * PROGRAM_SPEED)
+        print("delta: " + str(delta))
+        print("wmod: " + str(a))
+        print("lo: " + str(o))
+        self.weight += a
+        self.weight = max(-2.1, min(2.1, self.weight))
         
     def output(self, out):
         self.last_output = out
